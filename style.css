@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  background: radial-gradient(circle at center, #0a0e1f, #101a3f);
+  background: #101a30; /* более спокойный фон */
   font-family: Arial, sans-serif;
   color: #fff;
   overflow: hidden;
@@ -11,7 +11,7 @@ canvas {
   margin: 0 auto;
   border-bottom: 4px solid #4af;
   border-top: 4px solid #4af;
-  box-shadow: 0 0 20px #4af;
+  box-shadow: 0 0 15px #4af;
 }
 
 #menu {
@@ -20,29 +20,33 @@ canvas {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  background: rgba(0,0,0,0.6); /* полупрозрачный фон */
+  padding: 40px 60px;
+  border-radius: 15px;
+  box-shadow: 0 0 30px #222;
 }
 
 #menu h1 {
-  font-size: 52px;
-  margin-bottom: 30px;
+  font-size: 48px;
+  margin-bottom: 25px;
   color: #4af;
-  text-shadow: 0 0 20px #4af;
+  text-shadow: 0 0 10px #4af;
 }
 
 #menu button, #restart {
   padding: 14px 26px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #4af;
   color: #000;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
   transition: 0.3s;
 }
 
 #menu button:hover, #restart:hover {
   background: #6fc;
-  box-shadow: 0 0 15px #6fc;
+  box-shadow: 0 0 10px #6fc;
 }
 
 #restart {
