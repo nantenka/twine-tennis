@@ -17,8 +17,8 @@ robotImg.src = "images/robot.png";
 let player = { x: 20, y: canvas.height / 2 - 60, width: 15, height: 120, speed: 10 };
 let robot = { x: canvas.width - 120, y: canvas.height / 2 - 80, width: 100, height: 160 };
 
-// Мяч с физикой
-let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 12, dx: 5, dy: 3, gravity: 0.2, friction: 0.995 };
+// Мяч
+let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 10, dx: 6, dy: 6 };
 
 let playerScore = 0;
 let robotScore = 0;
@@ -26,7 +26,7 @@ const winScore = 3;
 let gameOver = false;
 let touchY = null;
 
-// Управление
+// Управление на мобильных
 canvas.addEventListener("touchmove", e => {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
@@ -38,15 +38,13 @@ window.addEventListener("mousemove", e => {
   touchY = e.clientY - rect.top;
 });
 
-// Сброс мяча
 function resetBall() {
   ball.x = canvas.width / 2;
   ball.y = canvas.height / 2;
-  ball.dx = (Math.random() > 0.5 ? 1 : -1) * 5;
-  ball.dy = (Math.random() * 4) - 2;
+  ball.dx = -ball.dx;
+  ball.dy = (Math.random() * 6) - 3;
 }
 
-// Проверка победы
 function checkWin() {
   if (playerScore === winScore || robotScore === winScore) {
     gameOver = true;
@@ -54,7 +52,6 @@ function checkWin() {
   }
 }
 
-// Кнопки
 restartBtn.onclick = () => {
   playerScore = 0;
   robotScore = 0;
@@ -70,18 +67,19 @@ startBtn.onclick = () => {
   loop();
 }
 
-// Отрисовка
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Фон
-  ctx.fillStyle = "#101a30";
+  // Анимация фона
+  let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, "#0d1326");
+  gradient.addColorStop(1, "#203a70");
+  ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Средняя линия
   ctx.strokeStyle = "#4af";
-  ctx.setLineDash([10,10]);
-  ctx.lineWidth = 3;
+  ctx.setLineDash([15, 15]);
+  ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(canvas.width / 2, 0);
   ctx.lineTo(canvas.width / 2, canvas.height);
@@ -97,7 +95,7 @@ function draw() {
 
   // Мяч
   ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
   ctx.fillStyle = "#fff";
   ctx.shadowBlur = 15;
   ctx.shadowColor = "#4af";
@@ -106,48 +104,56 @@ function draw() {
   ctx.closePath();
 
   // Счет
-  ctx.font = "26px Arial";
-  ctx.fillText(playerScore, canvas.width / 2 - 60, 40);
-  ctx.fillText(robotScore, canvas.width / 2 + 40, 40);
+  ctx.font = "28px Arial";
+  ctx.fillText(`${playerScore}`, canvas.width / 2 - 60, 40);
+  ctx.fillText(`${robotScore}`, canvas.width / 2 + 40, 40);
 }
 
-// Обновление
 function update() {
-  // Игрок
   if (touchY !== null) {
-    player.y += (touchY - (player.y + player.height/2)) * 0.2;
+    player.y += (touchY - (player.y + player.height / 2)) * 0.2;
   }
+  robot.y += ((ball.y - (robot.y + robot.height / 2)) * 0.05);
 
-  // ИИ слабее
-  robot.y += ((ball.y - (robot.y + robot.height/2)) * 0.025);
-
-  // Физика мяча
-  ball.dy += ball.gravity;
   ball.x += ball.dx;
   ball.y += ball.dy;
-  ball.dx *= ball.friction;
-  ball.dy *= ball.friction;
 
-  // Столкновение с верхом/низом
-  if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.dy = -ball.dy; wallSound.play(); }
-  if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.dy = -ball.dy; wallSound.play(); }
+  // Столкновение со стенами
+  if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+    ball.dy = -ball.dy;
+    wallSound.play();
+  }
 
   // Столкновение с игроком
-  if (ball.x - ball.radius < player.x + player.width && ball.y > player.y && ball.y < player.y + player.height) {
-    ball.dx = -ball.dx; hitSound.play();
+  if (ball.x - ball.radius < player.x + player.width &&
+      ball.y > player.y && ball.y < player.y + player.height) {
+    ball.dx = -ball.dx;
+    hitSound.play();
   }
 
   // Столкновение с роботом
-  if (ball.x + ball.radius > robot.x && ball.y > robot.y && ball.y < robot.y + robot.height) {
-    ball.dx = -ball.dx; hitSound.play();
+  if (ball.x + ball.radius > robot.x &&
+      ball.y > robot.y && ball.y < robot.y + robot.height) {
+    ball.dx = -ball.dx;
+    hitSound.play();
   }
 
   // Гол
-  if (ball.x < 0) { robotScore++; scoreSound.play(); resetBall(); checkWin(); }
-  if (ball.x > canvas.width) { playerScore++; scoreSound.play(); resetBall(); checkWin(); }
+  if (ball.x < 0) {
+    robotScore++;
+    scoreSound.play();
+    resetBall();
+    checkWin();
+  }
+
+  if (ball.x > canvas.width) {
+    playerScore++;
+    scoreSound.play();
+    resetBall();
+    checkWin();
+  }
 }
 
-// Главный цикл
 function loop() {
   if (!gameOver) {
     update();
